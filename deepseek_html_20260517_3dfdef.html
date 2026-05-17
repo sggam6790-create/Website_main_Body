@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AEGIS VAULT | FF GUILD GLORY</title>
+    <!-- Google Fonts + Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Space Grotesk', sans-serif;
+            background: radial-gradient(ellipse at 30% 20%, #0B1120, #010308);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #fff;
+        }
+
+        /* Particle canvas background */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        /* PRELOADER */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 20%, #0a0f1c, #010308);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            backdrop-filter: blur(8px);
+            transition: opacity 1s cubic-bezier(0.2, 0.9, 0.3, 1), visibility 0.2s;
+        }
+        .preloader.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .preloader-content {
+            text-align: center;
+            animation: floatGlow 2.5s ease-in-out infinite;
+        }
+        @keyframes floatGlow {
+            0%,100% { transform: translateY(0px); filter: drop-shadow(0 0 5px #ffb347); }
+            50% { transform: translateY(-12px); filter: drop-shadow(0 0 25px #ffb347); }
+        }
+        .preloader-logo {
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFE6B0, #FFA559, #FFD966);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: 6px;
+        }
+        .preloader-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(120deg, #ffffff, #FFD98C);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .loader-ring {
+            width: 90px;
+            height: 90px;
+            margin: 25px auto;
+        }
+        .loader-ring svg {
+            width: 100%;
+            height: 100%;
+            animation: spinLoader 1.6s linear infinite;
+        }
+        .loader-ring circle {
+            fill: none;
+            stroke: url(#gradLoader);
+            stroke-width: 5;
+            stroke-dasharray: 200;
+            stroke-dashoffset: 50;
+            stroke-linecap: round;
+            animation: dashLoader 1.4s ease-in-out infinite;
+        }
+        @keyframes spinLoader { 100% { transform: rotate(360deg); } }
+        @keyframes dashLoader { 0% { stroke-dashoffset: 200; } 50% { stroke-dashoffset: 50; } 100% { stroke-dashoffset: 200; } }
+        .loading-dots {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .loading-dots span {
+            width: 12px;
+            height: 12px;
+            background: #FFB347;
+            border-radius: 50%;
+            animation: pulseDot 1.2s infinite;
+            animation-delay: calc(0.15s * var(--i));
+        }
+        @keyframes pulseDot {
+            0%,100% { opacity: 0.2; transform: scale(0.8); background: #FFB347; }
+            50% { opacity: 1; transform: scale(1.3); background: #FFE6B0; }
+        }
+
+        /* DASHBOARD */
+        .dashboard {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 1s ease;
+            position: relative;
+            z-index: 10;
+        }
+        .dashboard.visible {
+            opacity: 1;
+        }
+        .choice-container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2.5rem;
+            justify-content: center;
+        }
+        .gate-card {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(8, 18, 32, 0.65);
+            backdrop-filter: blur(18px);
+            border-radius: 3rem;
+            border: 1px solid rgba(255, 190, 80, 0.4);
+            padding: 2.2rem 1.8rem;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 30px 40px -15px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .gate-card:hover {
+            transform: translateY(-12px);
+            border-color: rgba(255, 180, 70, 0.9);
+            background: rgba(16, 28, 52, 0.8);
+            box-shadow: 0 35px 50px -15px rgba(255, 180, 70, 0.2);
+        }
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .gate-card h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFE6B0, #FFB347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .price-badge {
+            display: inline-block;
+            background: rgba(255, 180, 70, 0.2);
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #FFD98C;
+            margin: 0.8rem 0;
+        }
+        .desc-text {
+            color: #B4C0E8;
+            font-size: 0.95rem;
+            margin: 1rem 0 1.8rem;
+            line-height: 1.5;
+        }
+        .action-btn {
+            background: linear-gradient(105deg, #FF9F4A, #FFB96A);
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0B1120;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .action-btn:hover {
+            transform: scale(0.98);
+            box-shadow: 0 8px 20px rgba(255, 170, 70, 0.4);
+        }
+        .whatsapp-contact {
+            margin-top: 1.5rem;
+            background: rgba(37, 211, 102, 0.12);
+            border-radius: 3rem;
+            padding: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border: 1px solid #25D366;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .whatsapp-contact:hover {
+            background: rgba(37, 211, 102, 0.25);
+            transform: scale(1.02);
+        }
+        .whatsapp-contact i {
+            font-size: 2rem;
+            color: #25D366;
+        }
+        .admin-note {
+            font-size: 0.7rem;
+            color: #9AA5C5;
+            margin-top: 1rem;
+        }
+        @media (max-width: 720px) {
+            .gate-card { padding: 1.5rem; }
+            .gate-card h2 { font-size: 1.8rem; }
+        }
+
+        /* Task Gateway Styles (injected) */
+        .gateway-vault {
+            background: rgba(6, 14, 28, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 3rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 200, 100, 0.5);
+            max-width: 750px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .vault-header { text-align: center; margin-bottom: 2rem; }
+        .vault-badge { background: #FFB34720; display: inline-block; padding: 0.3rem 1.2rem; border-radius: 40px; font-size: 0.75rem; color: #FFD98C; }
+        .gateway-vault h1 { font-size: 2rem; background: linear-gradient(135deg,#FFE6B0,#FFA559); background-clip: text; -webkit-background-clip: text; color: transparent; }
+        .tasks-container { display: flex; flex-direction: column; gap: 1.2rem; }
+        .task-card {
+            background: #0F1628CC;
+            border-radius: 2rem;
+            padding: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid #2A3455;
+        }
+        .task-info { display: flex; gap: 1rem; align-items: center; }
+        .task-icon { width: 48px; height: 48px; background: #1E2A44; border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+        .task-text h3 { font-size: 1.1rem; }
+        .task-desc { font-size: 0.7rem; color: #8F9BB7; }
+        .task-status-badge { padding: 0.3rem 1rem; border-radius: 30px; background: #1E293B; color: #BDC7E2; font-size: 0.7rem; font-weight: 600; }
+        .task-status-badge.completed { background: #1E5A3A; color: #D1FFE0; }
+        .task-btn { background: linear-gradient(95deg,#FF9F4A,#FFC96E); border: none; padding: 0.5rem 1.5rem; border-radius: 40px; font-weight: bold; cursor: pointer; }
+        .completion-glow { margin-top: 1.5rem; background: #1f6d3a66; border-radius: 2rem; padding: 1rem; text-align: center; color: #ccffdd; font-weight: 600; }
+        .back-btn { background: rgba(255,180,70,0.2); border: 1px solid #FFB347; padding: 8px 25px; border-radius: 40px; color: #FFD966; cursor: pointer; margin-top: 1.5rem; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<canvas id="particleCanvas"></canvas>
+
+<div class="preloader" id="preloader">
+    <div class="preloader-content">
+        <div class="preloader-logo">✦ FF ✦</div>
+        <div class="preloader-title">GUILD GLORY WEB</div>
+        <div class="loader-ring">
+            <svg viewBox="0 0 100 100">
+                <defs><linearGradient id="gradLoader" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FFD966"/></linearGradient></defs>
+                <circle cx="50" cy="50" r="42"/>
+            </svg>
+        </div>
+        <div class="loading-dots"><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span></div>
+        <div id="loaderPercent" style="margin-top: 18px; font-weight: 600; color: #FFD98C;">0%</div>
+    </div>
+</div>
+
+<div class="dashboard" id="dashboardMain">
+    <div class="choice-container">
+        <div class="gate-card">
+            <div class="card-icon">🆓</div>
+            <h2>Free Access</h2>
+            <div class="price-badge">✦ COMMUNITY NODE ✦</div>
+            <div class="desc-text">Complete 3 encrypted verifications to unlock bot activation center. Fast & secure gateway.</div>
+            <button class="action-btn" id="freeActivationBtn"><i class="fas fa-rocket"></i> Activate Free Bot</button>
+            <div class="admin-note"><i class="fas fa-shield-alt"></i> Tasks: Subscribe, Session Hold, External Handshake</div>
+        </div>
+        <div class="gate-card">
+            <div class="card-icon">💎</div>
+            <h2>Premium Access</h2>
+            <div class="price-badge">✦ PRIORITY VIP ✦</div>
+            <div class="desc-text">Direct admin support · Instant activation · Dedicated bot deployment & lifetime updates.</div>
+            <div id="whatsappPremiumBtn" class="whatsapp-contact">
+                <i class="fab fa-whatsapp"></i>
+                <span>Contact Admin on WhatsApp</span>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="admin-note">📱 Response within minutes · 24/7 support</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== PRELOADER ====================
+    (function() {
+        let progress = 0;
+        const percentSpan = document.getElementById('loaderPercent');
+        const preloader = document.getElementById('preloader');
+        const dashboard = document.getElementById('dashboardMain');
+        const interval = setInterval(() => {
+            progress += Math.floor(Math.random() * 10) + 3;
+            if(progress >= 100) {
+                progress = 100;
+                if(percentSpan) percentSpan.innerText = '100%';
+                clearInterval(interval);
+                preloader.classList.add('hide');
+                dashboard.classList.add('visible');
+                setTimeout(() => preloader.style.display = 'none', 1000);
+            } else {
+                if(percentSpan) percentSpan.innerText = progress + '%';
+            }
+        }, 90);
+    })();
+
+    // ==================== PARTICLE BACKGROUND (HD) ====================
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let w = window.innerWidth, h = window.innerHeight;
+    canvas.width = w; canvas.height = h;
+    let particles = [];
+    for(let i=0;i<180;i++) {
+        particles.push({ x: Math.random()*w, y: Math.random()*h, radius: Math.random()*2+1, alpha: Math.random()*0.5+0.2, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.2 });
+    }
+    function drawParticles() {
+        if(!ctx) return;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle = "#010308";
+        ctx.fillRect(0,0,w,h);
+        for(let p of particles) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+            ctx.fillStyle = `rgba(255, 200, 120, ${p.alpha})`;
+            ctx.fill();
+            p.x += p.vx; p.y += p.vy;
+            if(p.x<0) p.x=w; if(p.x>w) p.x=0;
+            if(p.y<0) p.y=h; if(p.y>h) p.y=0;
+        }
+        requestAnimationFrame(drawParticles);
+    }
+    window.addEventListener('resize', () => { w=window.innerWidth; h=window.innerHeight; canvas.width=w; canvas.height=h; });
+    drawParticles();
+
+    // ==================== TASK GATEWAY ENGINE ====================
+    function renderTaskGateway() {
+        const dashboardDiv = document.getElementById('dashboardMain');
+        dashboardDiv.innerHTML = `
+            <div class="gateway-vault">
+                <div class="vault-header">
+                    <div class="vault-badge">✦ SECURE VERIFICATION NODE ✦</div>
+                    <h1>ENCRYPTED GATEWAY</h1>
+                    <div class="subhead" style="color:#9aa3bf;">Complete all 3 tasks to unlock bot center</div>
+                </div>
+                <div class="tasks-container">
+                    <div class="task-card"><div class="task-info"><div class="task-icon">📌</div><div class="task-text"><h3>Task 1</h3><div class="task-desc">YouTube Channel Verification</div></div></div><div class="task-actions"><span class="task-status-badge" id="task1Status">pending</span><button class="task-btn" id="task1Btn">Verify</button></div></div>
+                    <div class="task-card"><div class="task-info"><div class="task-icon">⏳</div><div class="task-text"><h3>Task 2</h3><div class="task-desc">Secure Session Hold (60s)</div></div></div><div class="task-actions"><span class="task-status-badge" id="task2Status">pending</span><button class="task-btn" id="task2Btn">Start</button></div></div>
+                    <div class="task-card"><div class="task-info"><div class="task-icon">🔗</div><div class="task-text"><h3>Task 3</h3><div class="task-desc">External Handshake Portal</div></div></div><div class="task-actions"><span class="task-status-badge" id="task3Status">locked</span><button class="task-btn" id="task3Btn" disabled>Locked</button></div></div>
+                </div>
+                <div id="successArea" style="display:none;" class="completion-glow">✅ All tasks verified • Redirecting to bot center...</div>
+                <div style="text-align:center;"><button id="backToChoiceBtn" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Access Portal</button></div>
+            </div>
+        `;
+        initTaskEngine();
+        document.getElementById('backToChoiceBtn').onclick = () => location.reload();
+    }
+
+    function initTaskEngine() {
+        let task1=false, task2=false, task3=false, countdownActive=false, countdownInterval=null;
+        const t1Status=document.getElementById('task1Status'), t2Status=document.getElementById('task2Status'), t3Status=document.getElementById('task3Status');
+        const t1Btn=document.getElementById('task1Btn'), t2Btn=document.getElementById('task2Btn'), t3Btn=document.getElementById('task3Btn');
+        const successDiv=document.getElementById('successArea');
+        const YT_URL="https://youtube.com/@firexlegend420?si=ypz1M8GyIus3Z_xB";
+        const MONETAG_URL="https://omg10.com/4/11017489";
+        const EARN_URL="https://earnlinks.in/NDks";
+        function showToast(msg) { let t=document.createElement('div'); t.innerText=msg; t.style.cssText='position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1e2a3e; color:#ffd966; padding:10px 25px; border-radius:50px; z-index:9999; border:1px solid gold;'; document.body.appendChild(t); setTimeout(()=>t.remove(),2500); }
+        function finalRedirect() { if(successDiv.style.display!=='block'){ successDiv.style.display='block'; showToast("✅ All tasks done! Redirecting..."); setTimeout(()=>{ alert("🔁 Redirect to Bot Activation Center"); window.location.href = location.origin + location.pathname + "?botcenter=true"; },1500); } }
+        function updateUnlock() { if(task1&&task2&&!task3){ t3Btn.disabled=false; t3Status.innerText="ready"; } else if(!task1||!task2){ t3Btn.disabled=true; if(!task3) t3Status.innerText="locked"; } if(task1&&task2&&task3) finalRedirect(); }
+        t1Btn.onclick=()=>{ if(task1) return showToast("Already verified"); window.open(YT_URL,"_blank"); setTimeout(()=>{ if(confirm("✅ Have you subscribed/completed the action?")){ task1=true; t1Status.innerText="completed"; t1Status.classList.add("completed"); t1Btn.disabled=true; showToast("Task 1 completed!"); updateUnlock(); } else showToast("Please complete and confirm."); },1500); };
+        t2Btn.onclick=()=>{ if(task2) return; if(countdownActive) return; window.open(MONETAG_URL,"_blank"); const overlay=document.createElement('div'); overlay.style.cssText='position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.98); backdrop-filter:blur(20px); z-index:3000; display:flex; align-items:center; justify-content:center;'; overlay.innerHTML=`<div style="background:#0f172f; border-radius:2.5rem; padding:2rem; text-align:center; border:2px solid #FFB347;"><h3 style="color:#FFD966;">⏳ Stay on page</h3><div style="font-size:4rem; font-family:monospace;" id="cdNum">60</div><progress value="60" max="60" style="width:200px;"></progress><div style="color:#FFB347; margin-top:1rem;">⚠️ Do NOT leave</div></div>`; document.body.appendChild(overlay); let sec=60; countdownActive=true; countdownInterval=setInterval(()=>{ sec--; const numSpan=document.getElementById('cdNum'); if(numSpan) numSpan.innerText=sec; if(sec<=0){ clearInterval(countdownInterval); overlay.remove(); countdownActive=false; if(!task2){ task2=true; t2Status.innerText="completed"; t2Status.classList.add("completed"); t2Btn.disabled=true; showToast("Task 2 completed!"); updateUnlock(); } } },1000); };
+        t3Btn.onclick=()=>{ if(task3) return; if(!task1||!task2) return showToast("Complete Task 1 & 2 first"); const modal=document.createElement('div'); modal.style.cssText='position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.97); backdrop-filter:blur(16px); z-index:4000; display:flex; align-items:center; justify-content:center;'; modal.innerHTML=`<div style="background:#111827; border-radius:2rem; padding:2rem; max-width:380px; text-align:center; border:1px solid #FFB347;"><span style="font-size:2rem;">🔐</span><h3 style="color:#FFD966;">Final verification</h3><button id="openPortalBtn" style="background:#FF9F4A; border:none; padding:10px 25px; border-radius:40px; margin:15px;">Open Portal</button><div id="confirmWrap" style="display:none;"><button id="confirmFinalBtn" style="background:#2E7D5C; border:none; padding:8px 25px; border-radius:40px;">✓ Confirm</button></div><button id="closeModalBtn" style="background:transparent; border:1px solid #888; padding:5px 18px; border-radius:40px;">Cancel</button></div>`; document.body.appendChild(modal); let opened=false; document.getElementById('openPortalBtn').onclick=()=>{ window.open(EARN_URL,"_blank"); opened=true; document.getElementById('confirmWrap').style.display='block'; }; document.getElementById('confirmFinalBtn')?.addEventListener('click',()=>{ if(!opened) return showToast("Open portal first."); if(!task3){ task3=true; t3Status.innerText="completed"; t3Status.classList.add("completed"); t3Btn.disabled=true; modal.remove(); showToast("Task 3 completed!"); updateUnlock(); } else modal.remove(); }); document.getElementById('closeModalBtn').onclick=()=>modal.remove(); };
+    }
+
+    // FREE BUTTON
+    document.getElementById('freeActivationBtn').addEventListener('click', renderTaskGateway);
+    // PREMIUM WHATSAPP
+    document.getElementById('whatsappPremiumBtn').addEventListener('click', () => { window.open("https://wa.me/8801841273580?text=Hello%20Admin%2C%20I%20need%20Premium%20Bot%20Activation%20%7C%20FF%20GUILD%20GLORY", "_blank"); });
+</script>
+</body>
+</html>
