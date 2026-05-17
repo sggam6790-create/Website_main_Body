@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>GUILD GLORY | Neural Bot Activation Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Space Grotesk', sans-serif;
+            background: radial-gradient(ellipse at 20% 30%, #0a0f24, #01040c);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .orb-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(255,180,70,0.08), transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(0,255,170,0.06), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .main-container {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 30px 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .completion-badge {
+            background: linear-gradient(135deg, #00c85322, #00ffaa22);
+            border: 1.5px solid #00ffaa;
+            border-radius: 80px;
+            padding: 14px 28px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            animation: pulseNeon 2.2s infinite;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        @keyframes pulseNeon {
+            0% { box-shadow: 0 0 5px #00ffaa; border-color: #00ffaa; }
+            50% { box-shadow: 0 0 28px #00ffaa; border-color: #aaffdd; }
+            100% { box-shadow: 0 0 5px #00ffaa; border-color: #00ffaa; }
+        }
+
+        .glass-card {
+            background: rgba(8, 18, 34, 0.7);
+            backdrop-filter: blur(22px);
+            border-radius: 56px;
+            border: 1px solid rgba(255, 180, 70, 0.5);
+            padding: 38px 32px;
+            box-shadow: 0 30px 50px -20px black;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFE6B0, #FFA559, #00ffaa);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 30px 0 18px 0;
+            color: #FFD966;
+            border-left: 4px solid #FFB347;
+            padding-left: 15px;
+        }
+
+        .server-grid, .bot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 18px;
+            margin: 20px 0;
+        }
+
+        .server-card, .bot-card {
+            background: linear-gradient(145deg, #111a2f, #080e1f);
+            padding: 18px 12px;
+            border-radius: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid #2f3b66;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+        .server-card:hover, .bot-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffb347;
+            background: linear-gradient(145deg, #1e2a48, #0f162f);
+        }
+        .server-card.selected, .bot-card.selected {
+            border: 2px solid #ffb347;
+            background: linear-gradient(145deg, #ffb34733, #ff8c4233);
+            box-shadow: 0 0 20px #ffb347;
+        }
+
+        .input-group {
+            margin: 22px 0;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 16px 24px;
+            background: #0a1022cc;
+            border: 1.5px solid #ffb34766;
+            border-radius: 80px;
+            color: white;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #ffb347;
+            box-shadow: 0 0 15px #ffb347;
+        }
+
+        .deploy-btn {
+            background: linear-gradient(95deg, #00c853, #64dd17);
+            border: none;
+            padding: 18px 35px;
+            border-radius: 80px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: 0.25s;
+            color: #0a0f1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .deploy-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 35px #00ff88;
+        }
+
+        .terminal {
+            background: #03070fdd;
+            border-radius: 42px;
+            padding: 28px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #00ffaa;
+            box-shadow: 0 0 35px rgba(0, 255, 170, 0.2);
+            max-height: 420px;
+            overflow-y: auto;
+            margin-top: 35px;
+            display: none;
+        }
+        .terminal-line { margin: 8px 0; white-space: pre-wrap; color: #bbffdd; }
+        .terminal-line.warning { color: #ffaa66; }
+        .terminal-line.success { color: #aaffdd; text-shadow: 0 0 6px #00ffaa; }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.98);
+            backdrop-filter: blur(24px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: radial-gradient(circle at 20% 30%, #141e3a, #080e1c);
+            padding: 40px;
+            border-radius: 70px;
+            text-align: center;
+            max-width: 90%;
+            width: 500px;
+            border: 1px solid #ffb347;
+        }
+        .homepage-btn {
+            background: linear-gradient(95deg, #FF9F4A, #FFB96A);
+            padding: 12px 35px;
+            border-radius: 50px;
+            margin-top: 25px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        footer {
+            text-align: center;
+            margin-top: 35px;
+            font-size: 0.7rem;
+            color: #5e6a8f;
+        }
+    </style>
+</head>
+<body>
+<div class="orb-bg"></div>
+<div class="main-container">
+    <div class="completion-badge">
+        <i class="fas fa-check-circle"></i> EARNLINKS VERIFICATION COMPLETED • ACCESS GRANTED <i class="fas fa-shield-alt"></i>
+    </div>
+    <div class="glass-card">
+        <h1><i class="fas fa-microchip"></i> NEURAL BOT DEPLOYMENT</h1>
+        <p style="text-align: center; color: #b4c0e0; margin-top: 8px;">Military-grade activation protocol v6.2</p>
+
+        <div class="section-title"><i class="fas fa-globe-asia"></i> SELECT REGION SERVER</div>
+        <div class="server-grid" id="serverGrid">
+            <div class="server-card" data-server="bangladesh">🇧🇩 BANGLADESH</div>
+            <div class="server-card" data-server="nepal">🇳🇵 NEPAL</div>
+            <div class="server-card" data-server="india">🇮🇳 INDIA</div>
+            <div class="server-card" data-server="pakistan">🇵🇰 PAKISTAN</div>
+            <div class="server-card" data-server="srilanka">🇱🇰 SRI LANKA</div>
+            <div class="server-card" data-server="indonesia">🇮🇩 INDONESIA</div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-robot"></i> SELECT BOT UNIT</div>
+        <div class="bot-grid" id="botGrid">
+            <div class="bot-card" data-bot="BOT-1">🤖 BOT-1 | PRO</div>
+            <div class="bot-card" data-bot="BOT-2">⚡ BOT-2 | ELITE</div>
+            <div class="bot-card" data-bot="BOT-3">💎 BOT-3 | DIAMOND</div>
+            <div class="bot-card" data-bot="BOT-4">👑 BOT-4 | LEGENDARY</div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-key"></i> GUILD CREDENTIALS</div>
+        <div class="input-group"><input type="text" id="guildId" placeholder="🏰 Guild ID *"></div>
+        <div class="input-group"><input type="text" id="guestToken" placeholder="🔑 Guest Access Token *"></div>
+        <div class="input-group"><input type="password" id="password" placeholder="🔒 Encrypted Password *"></div>
+
+        <button class="deploy-btn" id="deployBtn"><i class="fas fa-rocket"></i> DEPLOY & ACTIVATE BOT <i class="fas fa-arrow-right"></i></button>
+        <div id="terminalContainer"><div class="terminal" id="terminal"></div></div>
+    </div>
+    <footer><i class="fas fa-shield-haltered"></i> 256-bit SSL Encrypted Session • Guild Glory Command</footer>
+</div>
+
+<script>
+    // ✅ পরিবর্তিত লিংক: এখানে আপনার নতুন URL বসানো হয়েছে
+    const HOMEPAGE_URL = "https://sggam6790-create.github.io/Website_Body/";
+    
+    let selectedServer = null, selectedBot = null;
+
+    document.querySelectorAll('.server-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.server-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedServer = card.getAttribute('data-server');
+        });
+    });
+    document.querySelectorAll('.bot-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.bot-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedBot = card.getAttribute('data-bot');
+        });
+    });
+
+    function showAlert(msg) {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `<div class="modal-content"><i class="fas fa-exclamation-triangle" style="font-size:3rem; color:#ffaa44;"></i><h3 style="margin:15px 0;">Validation Error</h3><p>${msg}</p><button class="homepage-btn" id="alertClose">OK</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('alertClose').onclick = () => modal.remove();
+    }
+
+    function startTerminal(guildId) {
+        const terminal = document.getElementById('terminal');
+        terminal.style.display = 'block';
+        terminal.innerHTML = '<div class="terminal-line">> 🔐 Initializing Quantum Deployment Node...</div>';
+        const logs = [
+            { text: `> 🌐 Server: ${selectedServer.toUpperCase()} | Latency: 9ms | Status: ONLINE`, type: "normal" },
+            { text: `> 🤖 Bot Unit: ${selectedBot} | Firmware: v6.2.1 | Neural core stable`, type: "normal" },
+            { text: `> 🏰 Guild ID: ${guildId.substring(0,4)}**** | Authenticating...`, type: "normal" },
+            { text: "> ⚠️ Bypassing regional firewall... [ENCRYPTED]", type: "warning" },
+            { text: "> 🧬 Injecting Glory Payload into bot cortex", type: "normal" },
+            { text: "> ████████░░░░ 44% - Handshake protocol", type: "normal" },
+            { text: "> ████████████░░ 78% - Syncing with mainframe", type: "normal" },
+            { text: "> ██████████████ 99% - Finalizing deployment", type: "normal" },
+            { text: "> ✅ [SUCCESS] Guild Bot Successfully Activated!", type: "success" },
+            { text: `> 🔑 Transaction ID: GL4-${Math.random().toString(36).substring(2,9).toUpperCase()}`, type: "success" },
+            { text: "> ⏳ Request submitted to central server. Please allow up to 5 hours for final confirmation.", type: "warning" }
+        ];
+        let idx = 0;
+        const interval = setInterval(() => {
+            if(idx < logs.length) {
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                if(logs[idx].type === 'warning') line.classList.add('warning');
+                if(logs[idx].type === 'success') line.classList.add('success');
+                line.innerHTML = logs[idx].text;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+                idx++;
+            } else {
+                clearInterval(interval);
+                setTimeout(() => showSuccessModal(), 1000);
+            }
+        }, 680);
+    }
+
+    function showSuccessModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `<div class="modal-content" style="background:linear-gradient(145deg,#0a3a2a,#062010);"><i class="fas fa-check-circle" style="font-size:4rem; color:#aaffdd;"></i><h2 style="margin:20px 0;">✅ ACTIVATION SUCCESSFUL ✅</h2><p>Your bot request has been encrypted & submitted to Guild Glory mainframe.</p><p style="margin:15px 0;"><strong>Status:</strong> Pending Final Confirmation</p><p>Please wait up to 5 hours for delivery.</p><button class="homepage-btn" id="redirectHomeBtn"><i class="fas fa-home"></i> CLOSE & GO TO HOMEPAGE</button></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('redirectHomeBtn').onclick = () => window.location.href = HOMEPAGE_URL;
+    }
+
+    document.getElementById('deployBtn').addEventListener('click', () => {
+        const guildId = document.getElementById('guildId').value.trim();
+        const guestToken = document.getElementById('guestToken').value.trim();
+        const password = document.getElementById('password').value.trim();
+        if(!selectedServer) return showAlert("⚠️ Please select a server region!");
+        if(!selectedBot) return showAlert("⚠️ Please select a bot unit!");
+        if(!guildId) return showAlert("⚠️ Please enter your Guild ID!");
+        if(!guestToken) return showAlert("⚠️ Please enter Guest Access Token!");
+        if(!password) return showAlert("⚠️ Please enter your password!");
+        startTerminal(guildId);
+    });
+</script>
+</body>
+</html>
